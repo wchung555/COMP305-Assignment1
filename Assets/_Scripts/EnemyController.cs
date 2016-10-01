@@ -6,11 +6,15 @@ using System.Collections;
 public class EnemyController : MonoBehaviour {
 
     #region private instance variables
+    private GameController _controller;
+
     private Vector2 _speed;
     private Transform _transform;
     #endregion
 
     #region public properties
+    public AudioClip enemySound;
+
     public Vector2 Speed {
         get {
             return _speed;
@@ -24,6 +28,7 @@ public class EnemyController : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
+        this._controller = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
         this._transform = this.GetComponent<Transform>();
         this._reset();
     }
@@ -32,7 +37,6 @@ public class EnemyController : MonoBehaviour {
     void Update() {
         this._move();
         this._borderCheck();
-
     }
 
     /// <summary>
@@ -43,6 +47,9 @@ public class EnemyController : MonoBehaviour {
         newPos.x -= this.Speed.x;
         newPos.y -= this.Speed.y;
         this._transform.position = newPos;
+
+        // prevent sprite from rotating after collision
+        this._transform.rotation = new Quaternion(0, 0, 0, 0);
     }
 
     /// <summary>
@@ -66,14 +73,25 @@ public class EnemyController : MonoBehaviour {
     /// <summary>
     /// Change the vertical direction of the game object
     /// </summary>
-    private void _bounce() {
+    private void _bounce() { 
         Vector2 oldSpeed = this.Speed;
         this.Speed = new Vector2(oldSpeed.x, -oldSpeed.y);
     }
 
-    private void OnTriggerEnter2D(Collider2D other) {
-        if (other.gameObject.CompareTag("enemy")) {
+    /// <summary>
+    /// Event handler for game object collisions
+    /// </summary>
+    private void OnCollisionEnter2D(Collision2D other) {
+        if (other.gameObject.CompareTag("enemy") || other.gameObject.CompareTag("doughnut")) {
             this._bounce();
+        }
+        else if (other.gameObject.CompareTag("Player")) {
+            //Debug.Log("Enemy hit!");
+            this._controller.HitEnemy();
+            //GetComponent<AudioSource>().PlayOneShot(enemySound);
+            Destroy(this.gameObject);
+            AudioSource.PlayClipAtPoint(enemySound, new Vector2(0, 0));
+
         }
     }
 }

@@ -6,11 +6,15 @@ using System.Collections;
 public class DoughnutController : MonoBehaviour {
 
     #region private instance variables
+    private GameController _controller;
+
     private int _speed;
     private Transform _transform;
     #endregion
 
     #region public properties
+    public AudioClip doughnutSound;
+
     public int Speed {
         get {
             return _speed;
@@ -24,6 +28,7 @@ public class DoughnutController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        this._controller = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
         this._transform = this.GetComponent<Transform>();
         this._reset();
 	}
@@ -60,5 +65,18 @@ public class DoughnutController : MonoBehaviour {
         Vector2 resetPos = new Vector2(352, Random.Range(-211, 211));
         this._transform.position = resetPos;
         this.Speed = 5;
+    }
+
+    /// <summary>
+    /// Event handler for game object collisions
+    /// </summary>
+    private void OnCollisionEnter2D(Collision2D other) {
+        if (other.gameObject.CompareTag("Player")) {
+            //Debug.Log("Doughnut hit!");
+            this._controller.GetDoughnut();
+            //GetComponent<AudioSource>().PlayOneShot(doughnutSound);
+            Destroy(this.gameObject);
+            AudioSource.PlayClipAtPoint(doughnutSound, new Vector2(0, 0));
+        }
     }
 }

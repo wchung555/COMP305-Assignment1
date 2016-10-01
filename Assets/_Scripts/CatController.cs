@@ -9,49 +9,28 @@ public class CatController : MonoBehaviour {
 
     #region private instance variables
     private Transform _transform;
-    private int _lives = 10;
-    private int _score = 0;
-
-    private Text _scoreText;
-    private Text _livesText;
+    private int _speed = 10;
     #endregion
 
     // Use this for initialization
     void Start () {
         this._transform = this.GetComponent<Transform>();
-
-        this._scoreText = GameObject.Find("Score Label").GetComponent<Text>();
-        this._livesText = GameObject.Find("Lives Label").GetComponent<Text>();
     }
 	
 	// Update is called once per frame
 	void Update () {
         this._move();
-
-        this._scoreText.text = "Score: " + this._score;
-        this._livesText.text = "x " + this._lives;
     }
 
     /// <summary>
     /// Move the game controller vertically according to the mouse's movement
     /// </summary>
     private void _move() {
-        this._transform.position = new Vector2(-270, Mathf.Clamp(Input.mousePosition.y - 240, -220, 220));
-    }
+        float moveY = Input.GetAxis("Vertical")*this._speed;
+        this._transform.Translate(new Vector2(0, moveY));
+        this._transform.position = new Vector2(-270, Mathf.Clamp(this._transform.position.y, -220, 220));
 
-    private void OnTriggerEnter2D(Collider2D other) {
-        if (other.gameObject.CompareTag("doughnut")) {
-            Debug.Log("Doughnut hit!");
-        }
-        else if (other.gameObject.CompareTag("enemy")) {
-            Debug.Log("Enemy hit!");
-            this._lives--;
-        }
-        Destroy(other.gameObject);
-
-        if (this._lives <= 0) {
-            Debug.Log("Game over...");
-            Destroy(this.gameObject);
-        }
+        // prevent sprite from rotating after collision
+        this._transform.rotation = new Quaternion(0, 0, 0, 0);
     }
 }
