@@ -7,12 +7,14 @@ using System.Collections;
 public class GameController : MonoBehaviour {
 
     private int _score = 0;
+    private int _highScore = 0;
     private int _lives = 10;
     private bool _isDoughnutPresent = false; // only one doughnut will appear per scene
     private int _currentEnemies = 0; // how many enemies have been spawned
     private int _enemiesPerLevel = 1; // max enemies to spawn
 
     [Header("Interactive Game Objects")]
+    public Transform player;
     public Transform doughnut;
     public int scoreIncrease = 10; // score increase when doughnut is collected
     public Transform enemy;
@@ -23,9 +25,13 @@ public class GameController : MonoBehaviour {
     public int levelUp = 100; // score required to level up
     public Image livesImage;
     public Text livesText;
+    public Text gameOverText;
+    public Text highScoreText;
+    public Button restartButton;
 
     // Use this for initialization
     void Start() {
+        // make sure values are valid
         if (scoreIncrease <= 0) {
             scoreIncrease = 10;
         }
@@ -37,6 +43,10 @@ public class GameController : MonoBehaviour {
         if (maxEnemies <= 0) {
             maxEnemies = 5;
         }
+
+        gameOverText.gameObject.SetActive(false);
+        highScoreText.gameObject.SetActive(false);
+        restartButton.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -50,9 +60,20 @@ public class GameController : MonoBehaviour {
         else {
             livesImage.rectTransform.position = new Vector2(809, 758);
         }
-
-        this._SpawnEnemies();
-        this._SpawnDoughnut();
+        
+        if (this._lives <= 0)
+        {
+            if (this._score > this._highScore)
+            {
+                this._highScore = this._score;
+            }
+            this._EndGame();
+        }
+        else
+        {
+            this._SpawnEnemies();
+            this._SpawnDoughnut();
+        }
     }
 
     /// <summary>
@@ -98,5 +119,41 @@ public class GameController : MonoBehaviour {
             Instantiate(doughnut);
             this._isDoughnutPresent = true;
         }
+    }
+
+    /// <summary>
+    /// Hide score and lives labels, and show game over and high score labels
+    /// </summary>
+    private void _EndGame()
+    {
+        player.gameObject.SetActive(false);
+        doughnut.gameObject.SetActive(false);
+        enemy.gameObject.SetActive(false);
+        scoreText.gameObject.SetActive(false);
+        livesImage.gameObject.SetActive(false);
+        livesText.gameObject.SetActive(false);
+
+        gameOverText.gameObject.SetActive(true);
+        highScoreText.gameObject.SetActive(true);
+        highScoreText.text = "High Score: " + this._highScore;
+        restartButton.gameObject.SetActive(true);
+    }
+
+    public void RestartButton_Click()
+    {
+        this._score = 0;
+        this._lives = 10;
+        
+        player.gameObject.SetActive(true);
+        doughnut.gameObject.SetActive(true);
+        enemy.gameObject.SetActive(true);
+        scoreText.gameObject.SetActive(true);
+        livesImage.gameObject.SetActive(true);
+        livesText.gameObject.SetActive(true);
+        this._enemiesPerLevel = 1;
+
+        gameOverText.gameObject.SetActive(false);
+        highScoreText.gameObject.SetActive(false);
+        restartButton.gameObject.SetActive(false);
     }
 }
